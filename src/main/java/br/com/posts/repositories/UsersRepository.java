@@ -23,6 +23,6 @@ public interface UsersRepository extends JpaRepository<User, Long>{
 	@Query("select u.user_to from User u where u.id = ?1")
 	List<User> findRelationship(long id);
 	@Modifying
-	@Query(nativeQuery = true, value="INSERT INTO usuario_relationship(usuario_id, usuario_to_id) VALUES(?1,?2)")
+	@Query(nativeQuery = true, value="INSERT INTO usuario_relationship(user_id, user_to_id) VALUES(?1,?2)")
 	void doRelationship(long id, long friendid);
 }

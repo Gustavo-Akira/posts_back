@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import br.com.posts.controllers.helpers.Helper;
 import br.com.posts.models.User;
 import br.com.posts.repositories.UsersRepository;
 
@@ -37,6 +38,9 @@ public class UsersController {
 	@Autowired
 	private ServletContext servletContext;
 	
+	@Autowired
+	private Helper helper;
+	
 	@GetMapping("/")
 	public ResponseEntity<Page<User>> index(){
 		PageRequest page = PageRequest.of(0, 5, Sort.by("name"));
@@ -47,7 +51,7 @@ public class UsersController {
 	public ResponseEntity<User> new_record(@ModelAttribute User user, MultipartFile image){
 		if (image != null && !image.isEmpty()) {
 	        String path = servletContext.getContextPath() + "resources/images/" + image.getOriginalFilename();
-	        saveFile(path, image);
+	        Helper.saveFile(path, image);
 	        user.setUrl_photo(path);
 		}
 		user.setSenha(new BCryptPasswordEncoder().encode(user.getSenha()));
@@ -61,16 +65,15 @@ public class UsersController {
 		User user = repository.findById(id).get();
 		return ResponseEntity.ok(user);
 	}
-	private User getUserActive() {
-		return repository.findUserByLogin((String)SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-	}
-	private static void saveFile(String path, MultipartFile file) {
-
-		File saveFile = new File(path);
-		try {
-			FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
-		} catch (IOException e) {
-			e.printStackTrace();
+	@PostMapping("/{id}")
+	public ResponseEntity<String> relationship(@PathVariable("id") long friendid){
+		long id = helper.getUserActive().getId();
+		if(repository.findById(friendid).get() != null) {
+			repository.doRelationship(id, friendid);
+		}else {
+			return ResponseEntity.ok("Error: user with this id doesnt exist");
 		}
+		return ResponseEntity.ok("Friendship realized with success");
 	}
+	
 }

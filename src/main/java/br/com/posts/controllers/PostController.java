@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import br.com.posts.controllers.helpers.Helper;
 import br.com.posts.models.Posts;
 import br.com.posts.models.User;
 import br.com.posts.repositories.PostsRepository;
@@ -41,6 +42,9 @@ public class PostController {
 	
 	@Autowired
 	private ServletContext servletContext;
+	
+	@Autowired
+	private Helper helper; 
 
 	@GetMapping("/")
 	public ResponseEntity<Page<Posts>> getAll() {
@@ -57,12 +61,11 @@ public class PostController {
 
 	@PostMapping("/")
 	public ResponseEntity<Posts> save(@ModelAttribute Posts post,MultipartFile file) throws Exception{
-		User user = userRepository
-				.findUserByLogin((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		User user = helper.getUserActive();
 		post.setUser(user);
 		if (file != null && !file.isEmpty()) {
 	        String path = servletContext.getContextPath() + "resources/images/posts/" + file.getOriginalFilename();
-	        saveFile(path, file);
+	        Helper.saveFile(path, file);
 	        post.setUrl(path);
 	    }else {
 	    	throw new IOException("");
@@ -73,7 +76,7 @@ public class PostController {
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Posts> change(@RequestBody Posts post, @PathVariable("id") long id) {
-		User user = getUserActive();
+		User user = helper.getUserActive();
 		Posts old = repository.findById(id).get();
 		if (user != old.getUser()) {
 			return ResponseEntity.status(401).body(post);
@@ -85,29 +88,14 @@ public class PostController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> delete(@PathVariable("id") long id) {
-		User users = getUserActive();
+		User user = helper.getUserActive();
 		Posts post = repository.getOne(id);
 		if (post == null) {
 			return ResponseEntity.ok("Dont have a post wiht that id");
 		}
-		if (users != post.getUser()) {
+		if (user != post.getUser()) {
 			return ResponseEntity.status(401).body("You dont have authorization to delete this post");
 		}
 		return ResponseEntity.ok("Post removed com success");
-	}
-
-	private User getUserActive() {
-		return userRepository
-				.findUserByLogin((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-	}
-
-	private static void saveFile(String path, MultipartFile file) {
-
-		File saveFile = new File(path);
-		try {
-			FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 }
