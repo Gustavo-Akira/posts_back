@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,7 +66,7 @@ public class UsersController {
 		User user = repository.findById(id).get();
 		return ResponseEntity.ok(user);
 	}
-	@PostMapping("/{id}")
+	@PostMapping("/friendship/{id}")
 	public ResponseEntity<String> relationship(@PathVariable("id") long friendid){
 		long id = helper.getUserActive().getId();
 		if(repository.findById(friendid).get() != null) {
@@ -75,5 +76,14 @@ public class UsersController {
 		}
 		return ResponseEntity.ok("Friendship realized with success");
 	}
-	
+	@DeleteMapping("/friendship/{id}")
+	public ResponseEntity<String> destroyRelationship(@PathVariable("id") long friendid){
+		long id = helper.getUserActive().getId();
+		if(repository.findById(friendid).get() != null) {
+			repository.doRelationship(id, friendid);
+		}else {
+			return ResponseEntity.ok("Error: user with this id doesnt exist");
+		}
+		return ResponseEntity.ok("Friendship realized with success");
+	}
 }
