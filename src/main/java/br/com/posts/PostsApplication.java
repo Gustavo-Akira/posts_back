@@ -1,5 +1,7 @@
 package br.com.posts;
 
+import java.util.Arrays;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,10 +20,5 @@ public class PostsApplication implements WebMvcConfigurer{
 	public static void main(String[] args) {
 		SpringApplication.run(PostsApplication.class, args);
 		//System.out.println(new BCryptPasswordEncoder().encode("kadeira"));
-	}
-	
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT");
 	}
 }

@@ -22,7 +22,7 @@ public class WebConfigSecurity extends WebSecurityConfigurerAdapter{
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+		http.cors().and().csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 		.disable().authorizeRequests().antMatchers("/").permitAll()
 		.antMatchers(HttpMethod.POST,"/index","/users/").permitAll()
 		.anyRequest().authenticated().and().logout().logoutSuccessUrl("/index")
